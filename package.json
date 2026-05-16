@@ -1,0 +1,29 @@
+{
+  "name": "acquisitions",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prakashsingha/acquisitions.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/prakashsingha/acquisitions/issues"
+  },
+  "homepage": "https://github.com/prakashsingha/acquisitions#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.8.0"
+  }
+}
