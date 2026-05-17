@@ -4,12 +4,13 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import authRouter from '#routes/auth.routes.js';
 
 const app = express();
 app.use(helmet());
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // handles JSON data
+app.use(express.urlencoded({ extended: true })); // handles URL-encoded data
 app.use(cookieParser());
 
 app.use(
@@ -25,7 +26,23 @@ app.use(express.json());
 
 app.get('/', (req, res) => {
   logger.info('Hello from Acquisitions API');
-  res.json({ message: 'Welcome to the Acquisitions API!' });
+  res.status(200).json({ message: 'Welcome to the Acquisitions API!' });
 });
+
+app.get('/health', (req, res) => {
+  logger.info('Health check requested');
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
+app.get('/api', (req, res) => {
+  logger.info('API endpoint requested');
+  res.status(200).json({ message: 'Acquisitions API is running!' });
+});
+
+app.use('/api/auth', authRouter);
 
 export default app;
