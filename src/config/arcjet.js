@@ -19,7 +19,7 @@ const aj = arcjet({
       mode: 'LIVE',
       interval: '2s',
       window: 10,
-      max: 5,
+      max: 20,
     }),
   ],
 });

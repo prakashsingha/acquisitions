@@ -38,7 +38,9 @@ const securityMiddleware = async (req, res, next) => {
         path: req.path,
         method: req.method,
       });
-      res.status(403).json({ error: 'Automated requests are not allowed' });
+      return res
+        .status(403)
+        .json({ error: 'Automated requests are not allowed' });
     }
 
     if (decision.isDenied() && decision.reason.isRateLimit()) {
@@ -47,7 +49,7 @@ const securityMiddleware = async (req, res, next) => {
         userAgent: req.get('User-Agent'),
         path: req.path,
       });
-      res.status(429).json({
+      return res.status(429).json({
         error: 'Too many requests',
         message: 'Request rate limit exceeded',
       });
@@ -60,7 +62,7 @@ const securityMiddleware = async (req, res, next) => {
         path: req.path,
         method: req.method,
       });
-      res.status(403).json({ error: 'Shield blocked request' });
+      return res.status(403).json({ error: 'Shield blocked request' });
     }
 
     if (decision.isDenied() && decision.reason.isSpam()) {
@@ -69,7 +71,13 @@ const securityMiddleware = async (req, res, next) => {
         userAgent: req.get('User-Agent'),
         path: req.path,
       });
+      return res.status(403).json({ error: 'Request blocked as spam' });
     }
+
+    if (decision.isDenied()) {
+      return res.status(403).json({ error: 'Request denied' });
+    }
+
     next();
   } catch (error) {
     logger.error('Arcjet middleware error', { error: error.message });

@@ -1,4 +1,5 @@
 import logger from '#config/logger.js';
+import { isEmailAlreadyExistsError } from '#utils/errors.js';
 import { formatValidationError } from '#utils/format.js';
 import { signupSchema } from '#validations/auth.validation.js';
 import { createUser, generateToken } from '#services/auth.service.js';
@@ -38,10 +39,9 @@ export const signup = async (req, res, next) => {
   } catch (error) {
     logger.error('Signup error:', error);
 
-    if (error.message === 'EMAIL_ALREADY_EXISTS') {
+    if (isEmailAlreadyExistsError(error)) {
       return res.status(409).json({ message: 'Email already exists' });
     }
-
     next(error);
   }
 };

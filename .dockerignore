@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+logs
+.git
+.gitignore
+.env
+.env.development
+.env.production
+.neon_local
+*.md
+!README.md
+Acquisitions-Architecture.pdf
+scripts/generate-architecture-pdf.js
+coverage
+.DS_Store

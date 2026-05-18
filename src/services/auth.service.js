@@ -10,7 +10,7 @@ export const hashPassword = async password => {
     return await bcrypt.hash(password, 10);
   } catch (error) {
     logger.error('Error hashing password:', error);
-    throw new Error('Password hashing failed');
+    throw new Error('Password hashing failed', { cause: error });
   }
 };
 
@@ -19,7 +19,7 @@ export const comparePassword = async (password, hash) => {
     return await bcrypt.compare(password, hash);
   } catch (error) {
     logger.error('Error comparing password:', error);
-    throw new Error('Password comparison failed');
+    throw new Error('Password comparison failed', { cause: error });
   }
 };
 
@@ -58,7 +58,7 @@ export const createUser = async ({ name, email, password, role = 'user' }) => {
     logger.info('User created:', { name, email, role });
     return newUser;
   } catch (error) {
-    logger.error('Error creating user:', error);
-    throw new Error('User creation failed');
+    logger.error('Error creating user111:', error);
+    throw error;
   }
 };

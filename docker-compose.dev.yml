@@ -1,0 +1,58 @@
+# Development: Acquisitions API + Neon Local (ephemeral branches)
+# Usage: docker compose -f docker-compose.dev.yml --env-file .env.development up --build
+
+services:
+  neon-local:
+    image: neondatabase/neon_local:latest
+    container_name: neon-local
+    ports:
+      - '${NEON_LOCAL_HOST_PORT:-5432}:5432'
+    environment:
+      NEON_API_KEY: ${NEON_API_KEY}
+      NEON_PROJECT_ID: ${NEON_PROJECT_ID}
+      # Omit PARENT_BRANCH_ID to use the project default branch as parent.
+      # Set PARENT_BRANCH_ID in .env.development to fork from a specific branch.
+      PARENT_BRANCH_ID: ${PARENT_BRANCH_ID:-}
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: acquisitions-app-dev
+    ports:
+      - '${PORT:-3000}:3000'
+    env_file:
+      - .env.development
+    environment:
+      NODE_ENV: development
+      # Override DATABASE_URL so the app always targets the compose service name.
+      DATABASE_URL: postgres://neon:npg@neon-local:5432/${POSTGRES_DB:-neondb}?sslmode=require
+      NEON_LOCAL: 'true'
+      NEON_LOCAL_HOST: neon-local
+      NEON_LOCAL_PORT: '5432'
+    depends_on:
+      neon-local:
+        condition: service_started
+    restart: unless-stopped
+
+  # Run migrations against the ephemeral branch (optional one-off):
+  #   docker compose -f docker-compose.dev.yml --env-file .env.development --profile migrate run --rm migrate
+  migrate:
+    profiles: [migrate]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    env_file:
+      - .env.development
+    environment:
+      DATABASE_URL: postgres://neon:npg@neon-local:5432/${POSTGRES_DB:-neondb}?sslmode=require
+      NEON_LOCAL: 'true'
+      NEON_LOCAL_HOST: neon-local
+      NEON_LOCAL_PORT: '5432'
+    command: ['npx', 'drizzle-kit', 'migrate']
+    depends_on:
+      neon-local:
+        condition: service_started

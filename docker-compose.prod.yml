@@ -1,0 +1,33 @@
+# Production: Acquisitions API connected directly to Neon Cloud (no Neon Local proxy)
+# Usage: docker compose -f docker-compose.prod.yml --env-file .env.production up --build -d
+#
+# DATABASE_URL must be your Neon Cloud connection string (e.g. *.neon.tech).
+# Neon serverless Postgres is hosted in the cloud — there is no database container here.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: acquisitions-app-prod
+    ports:
+      - '${PORT:-3000}:3000'
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      # DATABASE_URL comes from .env.production — never hardcode secrets in this file.
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
