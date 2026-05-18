@@ -1,0 +1,52 @@
+---
+description: Acquisitions API stack, layout, API conventions, and feature workflow
+alwaysApply: true
+---
+
+# Acquisitions API
+
+Node.js REST API (Express 5 monolith): routes → controllers → services → Drizzle → Neon Postgres.
+
+- **Runtime:** ESM (`"type": "module"`), Node 20+ in CI, Node 22 in Docker
+- **Entry:** `src/index.js` → `src/server.js` → `src/app.js`
+- **Public:** `GET /`, `GET /health`, `GET /api`
+- **API:** `/api/auth`, `/api/users`
+
+## Import aliases (always use `.js` extension)
+
+`#config/*`, `#controllers/*`, `#middleware/*`, `#models/*`, `#routes/*`, `#services/*`, `#utils/*`, `#validations/*`, `#src/*`
+
+## Layer rules
+
+| Layer | Responsibility |
+|-------|----------------|
+| routes | Verbs + middleware only; delegate to controllers |
+| controllers | Zod, HTTP codes, logging; use `req.user` from middleware |
+| services | Business logic + DB; domain errors |
+| models | Drizzle `pgTable` only |
+| validations | Zod per domain |
+| middleware | Auth, security (Arcjet) |
+
+## HTTP status conventions
+
+- **400** — `{ message, errors }` via `formatValidationError`
+- **401** — Auth / bad credentials
+- **403** — Forbidden (ownership, role, Arcjet)
+- **404** — `{ error: 'Not Found', message: 'Route not found' }` for unknown routes
+- **409** — Duplicate email
+- **201** — Created (signup)
+- **200** — `{ message, data? }` or `{ message, user?, token? }`
+
+## Adding a feature
+
+1. Zod schema in `validations/`
+2. Service method + domain errors + logging
+3. Controller (validation + HTTP); auth via middleware
+4. Route with `authenticateToken` / `requireRole`
+5. Drizzle model + `db:generate` / `db:migrate` if schema changes
+6. Supertest in `tests/`
+7. `npm run lint` and `npm test`
+
+Course specs: `prompts/` (architecture, auth, docker, user CRUD, CI/CD).
+
+**Git:** Commit only when the user asks. No force-push to `main`.

@@ -1,0 +1,29 @@
+---
+description: Drizzle ORM, Neon Postgres, and migrations
+globs: src/models/**,src/config/database.js,drizzle/**,drizzle.config.js
+alwaysApply: false
+---
+
+# Database & Neon
+
+- **ORM:** Drizzle; schema in `src/models/*.js`; SQL migrations in `drizzle/`
+- **`database.js`:** requires `DATABASE_URL` at import
+
+## Neon Local (Docker dev)
+
+- `NEON_LOCAL=true`, `NEON_LOCAL_HOST=neon-local`
+- Serverless driver HTTP proxy: `http://neon-local:5432/sql`
+
+## Production
+
+- Direct Neon Cloud URL in `.env.production` (no `neon-local` service)
+
+## Commands
+
+```bash
+npm run db:generate   # drizzle-kit generate
+npm run db:migrate    # drizzle-kit migrate
+npm run docker:migrate  # migrate against dev Neon Local
+```
+
+Schema changes: update model → generate → migrate → commit `drizzle/` files.

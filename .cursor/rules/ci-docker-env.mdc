@@ -1,0 +1,36 @@
+---
+description: GitHub Actions, Docker, and environment secrets
+globs: .github/**,Dockerfile,docker-compose*.yml,.dockerignore
+alwaysApply: false
+---
+
+# CI/CD (`.github/workflows/`)
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `lint-and-format.yml` | push/PR `main`, `staging` | Node 20, `npm ci`, lint + format:check |
+| `tests.yml` | push/PR `main`, `staging` | `npm test` + coverage artifact, job summary |
+| `docker-build-and-push.yml` | push `main`, `workflow_dispatch` | Multi-arch push to Docker Hub |
+
+**Docker image:** `${DOCKER_USERNAME}/acquisitions`  
+**Secrets:** `DOCKER_USERNAME`, `DOCKER_PASSWORD`  
+**Tags:** branch, SHA, `latest`, `prod-YYYYMMDD-HHmmss`  
+**Platforms:** `linux/amd64`, `linux/arm64` — Dockerfile `production` target
+
+# Docker local
+
+- **Dev:** `docker-compose.dev.yml` — `neon-local` + app; `npm run docker:dev`
+- **Prod:** `docker-compose.prod.yml` — app only, `/health` healthcheck; `npm run docker:prod`
+- **Targets:** `development` (full deps), `production` (omit devDeps, non-root)
+
+# Env & git
+
+| Variable | Purpose |
+|----------|---------|
+| `DATABASE_URL` | Required |
+| `JWT_SECRET` | JWT |
+| `ARCJET_KEY` | Arcjet |
+| `NEON_LOCAL*` | Local proxy |
+
+**Never commit:** `.env*`, `logs/`, `node_modules/`, `.neon_local/`, `coverage/`  
+**Always commit:** `src/`, `tests/`, `drizzle/`, `.github/workflows/`, `.cursor/rules/`

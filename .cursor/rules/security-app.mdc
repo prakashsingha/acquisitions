@@ -1,0 +1,23 @@
+---
+description: Global security middleware, app setup, and Arcjet
+globs: src/app.js,src/middleware/security.middleware.js,src/config/arcjet.js
+alwaysApply: false
+---
+
+# Security (global)
+
+In `app.js` (order matters):
+
+1. Helmet, CORS, JSON/urlencoded, cookie-parser
+2. Morgan → Winston
+3. **`securityMiddleware`** (Arcjet) — all requests
+4. Routes
+5. 404: `{ error: 'Not Found', message: 'Route not found' }`
+
+## Arcjet (`security.middleware.js`)
+
+- Base rules in `arcjet.js`: shield, detectBot, sliding window
+- Per-request rate limit by `req.user?.role`: admin 100, user 10, guest 5
+- Denials: bots 403, rate limit 429, shield/spam 403
+
+Set `ARCJET_KEY` in env; use `ARCJET_ENV=development` in tests/CI to reduce IP warnings.

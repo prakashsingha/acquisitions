@@ -1,0 +1,55 @@
+---
+description: JWT auth, middleware, auth routes, and user CRUD authorization
+globs: src/**/*auth*,src/**/*users*,src/middleware/auth.middleware.js
+alwaysApply: false
+---
+
+# Authentication
+
+## JWT (`auth.service.js`)
+
+- Payload: `{ id, email, role }`; secret `JWT_SECRET`; expiry `1h`
+- Delivery: httpOnly cookie `token` (`#utils/cookies.js`, 15 min) or `Authorization: Bearer <token>`
+
+## Middleware (`auth.middleware.js`)
+
+- **`authenticateToken`** → `req.user = { id, email, role }`; 401 if missing/invalid
+- **`requireRole(...roles)`** → 403 if role not allowed
+
+Never parse JWT in controllers; use `req.user` only.
+
+## Auth routes `/api/auth`
+
+| Method | Path | Notes |
+|--------|------|-------|
+| POST | `/signup` | `signupSchema`, `createUser`, cookie + token |
+| POST | `/signin` | `signinSchema`, `authenticateUser`; 401 `Invalid email or password` |
+| POST | `/signout` | `cookies.clear(res, 'token')` |
+
+- Signin: `USER_NOT_FOUND` / `INVALID_PASSWORD` → 401 (generic message)
+- Signup duplicate → 409 via `isEmailAlreadyExistsError`
+
+## User routes `/api/users`
+
+All routes: `usersRoutes.use(authenticateToken)`.
+
+| Method | Path | Extra | Rules |
+|--------|------|-------|-------|
+| GET | `/` | — | List users (no passwords) |
+| GET | `/:id` | — | `userIdSchema` on params |
+| PUT | `/:id` | — | Non-admin: own id only; `role` admin-only |
+| DELETE | `/:id` | `requireRole('admin')` | Admin only |
+
+**`updateUser` controller:** strip `role` for non-admins; 403 if non-admin sends `role`.
+
+## User service (`users.services.js`)
+
+- `publicUserColumns` — never expose `password`
+- `getUserById` → row or `null`
+- `updateUser` → `USER_NOT_FOUND`, email uniqueness, `hashPassword`, `updated_at`
+- `deleteUser` → `USER_NOT_FOUND` if missing
+
+## Zod (`users.validation.js`)
+
+- `userIdSchema`: `z.coerce.number().int().positive()`
+- `updateUserSchema`: optional `name`, `email`, `password`, `role`; min one field

@@ -1,0 +1,24 @@
+---
+description: ESLint, Prettier, and coding patterns for src and tests
+globs: src/**/*.js,tests/**/*.js
+alwaysApply: false
+---
+
+# Code style
+
+- **ESLint:** 2-space indent, single quotes, semicolons, Unix LF — `npm run lint` / `npm run lint:fix`
+- **Prettier:** `npm run format` / `npm run format:check` on `src/**/*.js`
+- Services: try/catch + `logger.error`; rethrow domain errors
+- Controllers: `formatValidationError` from `#utils/format.js`
+- Focused diffs only; no drive-by refactors or verbose obvious comments
+
+```javascript
+// Controller validation pattern
+const result = schema.safeParse(req.body);
+if (!result.success) {
+  return res.status(400).json({
+    message: 'Invalid input data',
+    errors: formatValidationError(result.error),
+  });
+}
+```

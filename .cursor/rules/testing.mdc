@@ -1,0 +1,33 @@
+---
+description: Jest, Supertest, and coverage conventions
+globs: tests/**,jest.config.mjs
+alwaysApply: false
+---
+
+# Testing
+
+- **Run:** `npm test` (`NODE_OPTIONS=--experimental-vm-modules`)
+- **Stack:** Jest + Supertest; import app from `#src/app.js` (no server listen)
+- **Coverage:** `coverage/` — gitignored; CI uploads artifact (30 days)
+
+## CI test env
+
+```
+NODE_ENV=test
+NODE_OPTIONS=--experimental-vm-modules
+DATABASE_URL=postgres://test:test@localhost:5432/test?sslmode=disable  # or secret
+JWT_SECRET=test-jwt-secret
+ARCJET_KEY=... 
+ARCJET_ENV=development
+```
+
+## Assertions
+
+404 routes must expect:
+
+```javascript
+expect(response.body).toHaveProperty('error', 'Not Found');
+expect(response.body).toHaveProperty('message', 'Route not found');
+```
+
+Commit `tests/` source; never commit `coverage/`.
