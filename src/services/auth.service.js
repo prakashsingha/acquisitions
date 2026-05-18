@@ -2,7 +2,7 @@ import logger from '#config/logger.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { db } from '#config/database.js';
-import { users } from '#models/user.model.js';
+import { users } from '#models/users.model.js';
 import { eq } from 'drizzle-orm';
 
 export const hashPassword = async password => {
@@ -29,6 +29,39 @@ export const generateToken = user => {
     process.env.JWT_SECRET || 'default_secret',
     { expiresIn: '1h' }
   );
+};
+
+export const authenticateUser = async (email, password) => {
+  try {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    if (!user) {
+      throw new Error('USER_NOT_FOUND');
+    }
+
+    const passwordValid = await comparePassword(password, user.password);
+    if (!passwordValid) {
+      throw new Error('INVALID_PASSWORD');
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      created_at: user.created_at,
+    };
+  } catch (error) {
+    if (error.message === 'USER_NOT_FOUND' || error.message === 'INVALID_PASSWORD') {
+      throw error;
+    }
+    logger.error('Error authenticating user:', error);
+    throw error;
+  }
 };
 
 export const createUser = async ({ name, email, password, role = 'user' }) => {

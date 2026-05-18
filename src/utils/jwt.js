@@ -1,6 +1,5 @@
 import logger from '#config/logger.js';
 import jwt from 'jsonwebtoken';
-import { verify } from 'node:crypto';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'set-your-secret-key-in-env-file';
 const JWT_EXPIRES_IN = '1d';
