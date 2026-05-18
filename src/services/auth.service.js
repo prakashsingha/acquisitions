@@ -56,7 +56,10 @@ export const authenticateUser = async (email, password) => {
       created_at: user.created_at,
     };
   } catch (error) {
-    if (error.message === 'USER_NOT_FOUND' || error.message === 'INVALID_PASSWORD') {
+    if (
+      error.message === 'USER_NOT_FOUND' ||
+      error.message === 'INVALID_PASSWORD'
+    ) {
       throw error;
     }
     logger.error('Error authenticating user:', error);

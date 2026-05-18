@@ -34,7 +34,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/acquisitions
+          images: ${{ secrets.DOCKER_USERNAME }}/k8-demo-api
           tags: |
             type=ref,event=branch
             type=sha,prefix=
@@ -60,7 +60,7 @@ jobs:
           {
             echo "## Docker Image Published"
             echo ""
-            echo "**Image:** \`${{ secrets.DOCKER_USERNAME }}/acquisitions\`"
+            echo "**Image:** \`${{ secrets.DOCKER_USERNAME }}/k8-demo-api\`"
             echo ""
             echo "### Tags"
             echo '```'
