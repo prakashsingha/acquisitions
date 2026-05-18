@@ -27,7 +27,8 @@ describe('API Endpoints', () => {
     it('should return 404 for non-existent routes', async () => {
       const response = await request(app).get('/nonexsistent').expect(404);
 
-      expect(response.body).toHaveProperty('error', 'Route not found');
+      expect(response.body).toHaveProperty('error', 'Not Found');
+      expect(response.body).toHaveProperty('message', 'Route not found');
     });
   });
 });
