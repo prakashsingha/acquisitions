@@ -5,8 +5,11 @@ import morgan from 'morgan';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRouter from '#routes/auth.routes.js';
+import securityMiddleware from '#middleware/security.middleware.js';
 
 const app = express();
+
+// Middleware
 app.use(helmet());
 app.use(cors());
 app.use(express.json()); // handles JSON data
@@ -21,9 +24,9 @@ app.use(
   })
 );
 
-// Middleware to parse JSON bodies
-app.use(express.json());
+app.use(securityMiddleware);
 
+// Routes
 app.get('/', (req, res) => {
   logger.info('Hello from Acquisitions API');
   res.status(200).json({ message: 'Welcome to the Acquisitions API!' });
